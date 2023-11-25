@@ -1,0 +1,49 @@
+//@version=5
+indicator("Equal Highs and Lows Line Drawer", shorttitle="Levels", overlay=true, max_bars_back=960)
+
+checkRange = input.int(10, title="Check Range", minval=0)
+luft = input.float(0.01, title="Luft",minval=0, step=0.01)
+touches = input.int(4, title="Touches",minval=2)
+exactTouches = input.int(2, title="Exact Touches",minval=0)
+numberOfLevels = input.int(5, title="Number of Levels", minval=1)
+
+var float[] highs = array.new_float()
+var float[] lows = array.new_float()
+var line[] lines = array.new_line()
+
+shouldDrawLine(priceLevel) =>
+    countLuft = 1
+    countExact = 1
+    count = 0
+    for i = 0 to array.size(highs) - 1
+        if math.abs(array.get(highs, i) - priceLevel) <= luft
+            countLuft := countLuft + 1
+        if math.abs(array.get(highs, i) - priceLevel) == 0
+            countExact := countExact + 1
+    for i = 0 to array.size(lows) - 1
+        if math.abs(array.get(lows, i) - priceLevel) <= luft
+            countLuft := countLuft + 1
+        if math.abs(array.get(lows, i) - priceLevel) == 0
+            countExact := countExact + 1
+    (luft > 0 and countExact >= exactTouches and countLuft >= touches) or (luft == 0 and countLuft >= touches)
+
+drawLine(priceLevel, lineColor) =>
+    // Remove the oldest line if we exceed the number of levels
+    if array.size(lines) == numberOfLevels
+        line.delete(array.shift(lines))
+    l = line.new(bar_index - 150, priceLevel, bar_index, priceLevel, color=lineColor, width=1)
+    array.push(lines, l)
+
+if (array.size(highs) > checkRange)
+    array.shift(highs)
+    array.shift(lows)
+
+// Check for matching highs and lows and draw a line
+if (array.size(highs) > 0)
+    if shouldDrawLine(high)
+        drawLine(high, color.blue)
+    if shouldDrawLine(low)
+        drawLine(low, color.blue)
+
+array.push(highs, high)
+array.push(lows, low)
