@@ -10,10 +10,11 @@ numberOfLevels = input.int(5, title="Number of Levels", minval=1)
 var float[] highs = array.new_float()
 var float[] lows = array.new_float()
 var line[] lines = array.new_line()
+var label[] labels = array.new_label()
 
 shouldDrawLine(priceLevel) =>
-    countLuft = 1
-    countExact = 1
+    countLuft = 0
+    countExact = 0
     for i = 0 to array.size(highs) - 1
         if math.abs(array.get(highs, i) - priceLevel) <= luft
             countLuft := countLuft + 1
@@ -27,14 +28,14 @@ shouldDrawLine(priceLevel) =>
     (luft > 0 and countExact >= exactTouches and countLuft >= touches) or (luft == 0 and countLuft >= touches)
 
 countExactHighTouches(priceLevel) =>
-    countExact = 1
+    countExact = 0
     for i = 0 to array.size(highs) - 1
         if array.get(highs, i) == priceLevel
             countExact := countExact + 1
     countExact
 
 countExactLowTouches(priceLevel) =>
-    countExact = 1
+    countExact = 0
     for i = 0 to array.size(lows) - 1
         if array.get(lows, i) == priceLevel
             countExact := countExact + 1
@@ -46,6 +47,12 @@ drawLine(priceLevel, lineColor, style) =>
         line.delete(array.shift(lines))
     l = line.new(bar_index - 150, priceLevel, bar_index, priceLevel, color=lineColor, style = style, width=1)
     array.push(lines, l)
+
+drawLabel(priceLevel, value, color, shift) =>
+    if array.size(labels) == numberOfLevels
+        label.delete(array.shift(labels))
+    l = label.new(bar_index, priceLevel+shift, str.tostring(value,'#'), textcolor = color, style = label.style_none)    
+    array.push(labels, l)
 
 array.push(highs, high)
 array.push(lows, low)
@@ -74,11 +81,12 @@ if (array.size(highs) > 0)
         color := color.green
         style := line.style_solid
     if (exLL < exHL and drawLow)
-        log.info('{0} {1} {2}', exLL, exHL, lows)
         color := color.red
         style := line.style_solid
      
     if drawHigh
         drawLine(high, color, style)
+        drawLabel(high, (exHH+exLH), color, 0.02)
     if drawLow
         drawLine(low, color, style)
+        drawLabel(low, (exHL+exLL), color, -0.06)
