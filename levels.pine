@@ -47,6 +47,9 @@ drawLine(priceLevel, lineColor, style) =>
     l = line.new(bar_index - 150, priceLevel, bar_index, priceLevel, color=lineColor, style = style, width=1)
     array.push(lines, l)
 
+array.push(highs, high)
+array.push(lows, low)
+
 if (array.size(highs) > checkRange)
     array.shift(highs)
     array.shift(lows)
@@ -71,6 +74,7 @@ if (array.size(highs) > 0)
         color := color.green
         style := line.style_solid
     if (exLL < exHL and drawLow)
+        log.info('{0} {1} {2}', exLL, exHL, lows)
         color := color.red
         style := line.style_solid
      
@@ -78,6 +82,3 @@ if (array.size(highs) > 0)
         drawLine(high, color, style)
     if drawLow
         drawLine(low, color, style)
-
-array.push(highs, high)
-array.push(lows, low)
