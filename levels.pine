@@ -51,7 +51,7 @@ drawLine(priceLevel, lineColor, style) =>
 drawLabel(priceLevel, value, color, shift) =>
     if array.size(labels) == numberOfLevels
         label.delete(array.shift(labels))
-    l = label.new(bar_index, priceLevel+shift, str.tostring(value,'#'), textcolor = color, style = label.style_none)    
+    l = label.new(bar_index, priceLevel+shift, str.tostring(value,'#') +  str.tostring(priceLevel,'/#.##'), textcolor = color, style = label.style_none)    
     array.push(labels, l)
 
 array.push(highs, high)
@@ -63,7 +63,8 @@ if (array.size(highs) > checkRange)
 
 // Check for matching highs and lows and draw a line
 if (array.size(highs) > 0)
-    color = color.blue
+    colorHigh = color.blue
+    colorLow = colorHigh
     style = line.style_dashed
     drawHigh = shouldDrawLine(high)
     drawLow = shouldDrawLine(low)
@@ -72,21 +73,21 @@ if (array.size(highs) > 0)
     exHL = countExactHighTouches(low)
     exLL = countExactLowTouches(low)
     if (exHH > exLH and drawHigh)
-        color := color.red
+        colorHigh := color.red
         style := line.style_solid
     if (exHH < exLH and drawHigh)
-        color := color.green
+        colorHigh := color.green
         style := line.style_solid
     if (exLL > exHL and drawLow)
-        color := color.green
+        colorLow := color.green
         style := line.style_solid
     if (exLL < exHL and drawLow)
-        color := color.red
+        colorLow := color.red
         style := line.style_solid
      
     if drawHigh
-        drawLine(high, color, style)
-        drawLabel(high, (exHH+exLH), color, 0.02)
+        drawLine(high, colorHigh, style)
+       // drawLabel(high, (exHH+exLH), color, 0.02)
     if drawLow
-        drawLine(low, color, style)
-        drawLabel(low, (exHL+exLL), color, -0.06)
+        drawLine(low, colorLow, style)
+       // drawLabel(low, (exHL+exLL), color, -0.02)
